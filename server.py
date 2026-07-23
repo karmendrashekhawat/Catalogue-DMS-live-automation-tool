@@ -159,20 +159,24 @@ def dc_login(page, user, pw, after_epoch):
 
     # username
     filled_u = False
-    for sel in ['input[name*="user" i]', 'input[placeholder*="user" i]',
+    for sel in ['input[placeholder*="Username" i]', 'input[name*="user" i]',
                 'input[id*="user" i]', 'input[type="text"]']:
         try:
-            page.fill(sel, user, timeout=6000)
+            box = page.locator(sel).first
+            box.click(timeout=4000)
+            box.fill(user, timeout=6000)
             filled_u = True
             break
         except Exception:
             continue
     # password
     filled_p = False
-    for sel in ['input[type="password"]', 'input[name*="pass" i]',
-                'input[placeholder*="pass" i]']:
+    for sel in ['input[type="password"]', 'input[placeholder*="Password" i]',
+                'input[name*="pass" i]']:
         try:
-            page.fill(sel, pw, timeout=6000)
+            box = page.locator(sel).first
+            box.click(timeout=4000)
+            box.fill(pw, timeout=6000)
             filled_p = True
             break
         except Exception:
@@ -180,13 +184,42 @@ def dc_login(page, user, pw, after_epoch):
     if not (filled_u and filled_p):
         log("warn", "Could not auto-fill login — fill it manually in the browser.")
 
-    _click_first(page, ['button:has-text("Continue")', 'button[type="submit"]',
-                         'button:has-text("Login")', 'button:has-text("Sign in")'],
-                 label="Clicked Continue")
+    # Blur the password field so the form's JS validation runs and un-disables Continue
+    try:
+        page.keyboard.press("Tab")
+    except Exception:
+        pass
+    time.sleep(0.5)
+
+    # Continue can stay disabled for a moment while the form validates — retry, don't
+    # just click once and move on.
+    clicked = False
+    for _ in range(6):
+        if _click_first(page, ['button:has-text("Continue")', 'button[type="submit"]',
+                               'button:has-text("Login")', 'button:has-text("Sign in")'],
+                        timeout=3000):
+            clicked = True
+            break
+        time.sleep(0.7)
+    log("ok" if clicked else "warn",
+        "Clicked Continue" if clicked else "Continue never became clickable — check the fields manually")
     safe_wait(page, 20000, 3.0)
 
-    # ── MFA ──────────────────────────────────────────────────────────────────
+    # ── MFA method selection ──────────────────────────────────────────────────
+    # DealerCenter defaults to SMS ("Verify Your Identity — We've sent a text message").
+    # Switch to email so the code lands where we can read it.
     set_step(3)
+    if _click_first(page, ['text=Try another method', 'a:has-text("Try another method")',
+                          'button:has-text("Try another method")'],
+                    timeout=6000, label="Clicked 'Try another method'"):
+        safe_wait(page, 10000, 1.5)
+        _click_first(page, ['text=Email', 'button:has-text("Email")',
+                            '[role="button"]:has-text("Email")'],
+                     timeout=6000, label="Selected Email verification")
+        safe_wait(page, 15000, 2.5)
+    else:
+        log("info", "No 'Try another method' link seen — assuming email MFA is already active")
+
     otp = None
     if GMAIL_ADDR and GMAIL_PASS:
         log("info", "Fetching MFA code from Gmail ...")
@@ -254,14 +287,24 @@ def dc_login(page, user, pw, after_epoch):
 def dc_open_active_inventory(page):
     set_step(4)
     log("info", "Opening Active Inventory ...")
-    # try clicking the count / tile labelled "Active Inventory"
-    clicked = _click_first(page, [
-        'text=Active Inventory',
-        ':text("Active Inventory")',
-        'a:has-text("Active Inventory")',
-    ], label="Clicked Active Inventory")
+    # The clickable element is the NUMBER just to the left of the "Active Inventory"
+    # label, not the label itself — clicking the label text does nothing.
+    clicked = False
+    for sel in [
+        'xpath=//*[normalize-space(text())="Active Inventory"]/preceding::*[1]',
+        'xpath=//*[contains(normalize-space(.),"Active Inventory")]/preceding-sibling::*[1]',
+        'xpath=(//*[contains(normalize-space(.),"Active Inventory")])[1]'
+        '/ancestor::*[self::a or self::button or @role="button"][1]',
+    ]:
+        try:
+            page.locator(sel).first.click(timeout=4000)
+            clicked = True
+            log("ok", "Clicked the Active Inventory count")
+            break
+        except Exception:
+            continue
     if not clicked:
-        # fallback: the report opens at this route
+        # fallback: the report opens at this route directly
         try:
             page.goto("https://app.dealercenter.net/apps/shell/reports/custom/"
                       "inventoryreport/active-inventory-report?inventorystatus=0",
