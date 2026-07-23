@@ -1,0 +1,7 @@
+{
+  "login_url": "https://app.dealercenter.net/apps/shell/reports/home",
+  "port": 7433,
+  "image_extensions": [".jpg", ".jpeg", ".png"],
+  "save_retry_attempts": 6,
+  "otp_timeout_seconds": 120
+}

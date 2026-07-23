@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DealerCenter Media Uploader — Spyne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0e11;--surface:#14161b;--surface2:#1c1f27;--surface3:#252933;
+  --border:#2a2e3a;--border2:#363c4e;--accent:#4f8ef7;--accent-dim:#1e3460;
+  --accent-glow:rgba(79,142,247,0.15);--green:#2dd98a;--green-dim:#0f3d25;
+  --amber:#f5a623;--amber-dim:#3d2800;--red:#f05252;--red-dim:#3d1010;
+  --text:#e8eaf0;--text2:#8b92a8;--text3:#50566a;
+  --mono:'IBM Plex Mono',monospace;--sans:'Syne',sans-serif;--r:8px;--r2:12px;
+}
+html{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
+body{min-height:100vh;padding:2rem 1.5rem}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:1.5rem}
+.head{display:flex;align-items:center;gap:12px}
+.logo{width:36px;height:36px;background:var(--accent);border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+.title{font-size:17px;font-weight:700}
+.sub{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1.25rem}
+.card h2{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.08em;
+  text-transform:uppercase;margin-bottom:1rem}
+label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px}
+input[type=text]{width:100%;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--r);padding:11px 13px;color:var(--text);font-family:var(--mono);font-size:13px}
+input[type=text]:focus{outline:none;border-color:var(--accent)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem}
+button{font-family:var(--sans);font-weight:600;font-size:13px;border:none;
+  border-radius:var(--r);padding:11px 20px;cursor:pointer;transition:.15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-ghost{background:var(--surface3);color:var(--text2)}
+.btn-ghost:hover{color:var(--text)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.status-pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);
+  font-size:12px;padding:5px 12px;border-radius:99px;background:var(--surface2);border:1px solid var(--border2)}
+.dot{width:8px;height:8px;border-radius:99px;background:var(--text3)}
+.dot.running{background:var(--accent);animation:pulse 1.2s infinite}
+.dot.done{background:var(--green)}.dot.error,.dot.otp_wait{background:var(--amber)}
+.dot.stopped{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.acc{display:grid;grid-template-columns:1fr auto;gap:8px 14px;padding:12px 14px;
+  border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;background:var(--surface2)}
+.acc-name{font-weight:600}
+.acc-user{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.acc-meta{text-align:right;font-family:var(--mono);font-size:12px;color:var(--text2)}
+.bar{grid-column:1/-1;height:5px;background:var(--surface3);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.tag{font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:99px}
+.tag.pending{background:var(--surface3);color:var(--text3)}
+.tag.running{background:var(--accent-glow);color:var(--accent)}
+.tag.done{background:var(--green-dim);color:var(--green)}
+.tag.error{background:var(--red-dim);color:var(--red)}
+.tag.skipped{background:var(--amber-dim);color:var(--amber)}
+.otp{background:var(--amber-dim);border:1px solid var(--amber);border-radius:var(--r);
+  padding:14px;display:none;gap:10px;align-items:center;flex-wrap:wrap}
+.otp.show{display:flex}
+.otp input{width:140px;letter-spacing:.3em;text-align:center}
+.log{background:#0a0b0e;border:1px solid var(--border);border-radius:var(--r);
+  font-family:var(--mono);font-size:12px;padding:12px;height:320px;overflow-y:auto;line-height:1.7}
+.log .t{color:var(--text3)}.log .info{color:var(--text2)}.log .ok{color:var(--green)}
+.log .warn{color:var(--amber)}.log .error{color:var(--red)}
+.hint{font-size:11px;color:var(--text3);margin-top:8px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="logo">S</div>
+    <div>
+      <div class="title">DealerCenter Media Uploader</div>
+      <div class="sub">Spyne · localhost:7433</div>
+    </div>
+    <div style="margin-left:auto">
+      <span class="status-pill"><span class="dot" id="dot"></span><span id="statusText">idle</span></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Data folder</h2>
+    <label>Path to the folder that contains your account subfolders (the "Live" folder)</label>
+    <input type="text" id="folder" placeholder="C:\Users\You\Desktop\Live" spellcheck="false"/>
+    <div class="row">
+      <button class="btn-primary" id="startBtn" onclick="start()">Start upload</button>
+      <button class="btn-ghost" id="stopBtn" onclick="stop()">Stop</button>
+      <button class="btn-ghost" onclick="reset()">Reset</button>
+    </div>
+    <div class="hint">Accounts and Gmail are read from <b>.env.local</b>. Each account folder must match a
+      <span style="font-family:var(--mono)">DC_ACCOUNT_n_NAME</span>. Inside each account folder, one subfolder per VIN.</div>
+  </div>
+
+  <div class="otp" id="otpBox">
+    <span id="otpPrompt">Enter MFA code</span>
+    <input type="text" id="otpInput" maxlength="8" placeholder="000000"/>
+    <button class="btn-primary" onclick="submitOtp()">Submit OTP</button>
+  </div>
+
+  <div class="card" id="accCard" style="display:none">
+    <h2>Accounts</h2>
+    <div id="accounts"></div>
+  </div>
+
+  <div class="card">
+    <h2>Activity log</h2>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script>
+async function start(){
+  const folder=document.getElementById('folder').value.trim();
+  if(!folder){alert('Enter your data folder path first.');return;}
+  const r=await fetch('/start',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({folder})});
+  const j=await r.json();
+  if(!j.ok) alert(j.error||'Could not start');
+}
+async function stop(){await fetch('/stop');}
+async function reset(){await fetch('/reset');document.getElementById('accounts').innerHTML='';}
+async function submitOtp(){
+  const code=document.getElementById('otpInput').value.trim();
+  if(!code)return;
+  await fetch('/otp',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({code})});
+  document.getElementById('otpInput').value='';
+}
+
+function render(s){
+  const dot=document.getElementById('dot');
+  dot.className='dot '+s.status;
+  document.getElementById('statusText').textContent=s.status;
+  document.getElementById('startBtn').disabled=(s.status==='running'||s.status==='otp_wait');
+
+  // OTP box
+  const box=document.getElementById('otpBox');
+  if(s.status==='otp_wait'){box.classList.add('show');
+    document.getElementById('otpPrompt').textContent=s.otp_prompt||'Enter MFA code';}
+  else box.classList.remove('show');
+
+  // accounts
+  const card=document.getElementById('accCard');
+  if(s.accounts&&s.accounts.length){
+    card.style.display='block';
+    document.getElementById('accounts').innerHTML=s.accounts.map(a=>{
+      const total=a.total||0,done=a.done||0,failed=a.failed||0;
+      const pct=total?Math.round(((done+failed)/total)*100):0;
+      const cur=a.current_vin?` · uploading ${a.current_vin}`:'';
+      return `<div class="acc">
+        <div><div class="acc-name">${a.name} <span class="tag ${a.status}">${a.status}</span></div>
+          <div class="acc-user">${a.matched?a.user:'no matching credentials'}${cur}</div></div>
+        <div class="acc-meta">${done}/${total} done${failed?` · ${failed} failed`:''}</div>
+        <div class="bar"><i style="width:${pct}%"></i></div>
+      </div>`;
+    }).join('');
+  }
+
+  // log
+  const log=document.getElementById('log');
+  const atBottom=log.scrollHeight-log.scrollTop-log.clientHeight<40;
+  log.innerHTML=(s.log||[]).map(e=>
+    `<div><span class="t">${e.t}</span> <span class="${e.kind}">${e.msg}</span></div>`).join('');
+  if(atBottom)log.scrollTop=log.scrollHeight;
+}
+
+async function poll(){
+  try{const r=await fetch('/state');render(await r.json());}catch(e){}
+}
+setInterval(poll,1000);poll();
+</script>
+</body>
+</html>
