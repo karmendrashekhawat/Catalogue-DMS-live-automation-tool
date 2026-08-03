@@ -1,5 +1,6 @@
 {
   "login_url": "https://app.dealercenter.net/apps/shell/reports/home",
+  "vinmotion_url": "https://vinmotion.vehicledata.com/Inventory",
   "port": 7433,
   "image_extensions": [".jpg", ".jpeg", ".png"],
   "save_retry_attempts": 6,
