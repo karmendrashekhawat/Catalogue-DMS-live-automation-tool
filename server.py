@@ -1805,11 +1805,21 @@ def va_upload_images(page, images):
 
 
 def va_close_vehicle(page):
-    """Close the vehicle detail overlay via its own close icon (identified by
-    the onCloseClick handler), falling back to a direct navigation back to
-    Media Management if the icon can't be found."""
+    """Close the vehicle detail overlay via its own close icon, falling back
+    to a direct navigation back to Media Management if it can't be found.
+
+    The icon is a plain "X" next to the modal's own Popout/Feedback/Help
+    links (confirmed by screenshot) — try several common patterns for that
+    quickly before giving up, since the exact markup isn't public."""
     log("info", "Closing vehicle record ...")
-    if _click_first(page, ['a[onclick*="onCloseClick"]'], timeout=6000):
+    if _click_first(page, [
+        'a[onclick*="onCloseClick"]',
+        'button[aria-label="Close" i]',
+        '[aria-label="Close" i]',
+        'button:has-text("×")',
+        'a:has-text("×")',
+        'svg[aria-label="Close" i]',
+    ], timeout=3000):
         safe_wait(page, 15000, 2.0)
         return
     log("info", "Close icon not found — navigating back to Media Management directly")
