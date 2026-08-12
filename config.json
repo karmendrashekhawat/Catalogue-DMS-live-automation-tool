@@ -1,7 +1,7 @@
 {
   "login_url": "https://app.dealercenter.net/apps/shell/reports/home",
-  "port": 7433,
-  "image_extensions": [".jpg", ".jpeg", ".png"],
-  "save_retry_attempts": 6,
-  "otp_timeout_seconds": 120
+  "vinmotion_url": "https://vinmotion.vehicledata.com/Inventory",
+  "vauto_url": "https://provision.vauto.app.coxautoinc.com",
+  "vauto_media_url": "https://provision.vauto.app.coxautoinc.com/Va/Merchandising/MediaManagement.aspx",
+  "port": 7433
 }

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DMS Media Suite — Spyne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --r:10px; --r2:14px;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+[data-theme="midnight"]{
+  --bg:#0a0d14; --sidebar:#0d1119; --surface:#131826; --surface2:#1a2033; --surface3:#222a42;
+  --border:#242c42; --border2:#323b57; --text:#e9edf7; --text2:#8d96b8; --text3:#565f80;
+  --accent:#4f8ef7; --accent-ink:#ffffff; --accent-glow:rgba(79,142,247,.16);
+  --good:#34d399; --good-dim:#0e3327; --warn:#f5a623; --warn-dim:#3a2a05; --bad:#f0555a; --bad-dim:#3a1518;
+}
+[data-theme="slate"]{
+  --bg:#0e1013; --sidebar:#111317; --surface:#171a1f; --surface2:#1f232a; --surface3:#282d36;
+  --border:#2a2f37; --border2:#383f4a; --text:#eceef1; --text2:#98a0ac; --text3:#5b6270;
+  --accent:#e0a53c; --accent-ink:#1a1400; --accent-glow:rgba(224,165,60,.16);
+  --good:#3fcf8e; --good-dim:#0f3327; --warn:#e0a53c; --warn-dim:#2c2308; --bad:#e15a5a; --bad-dim:#361414;
+}
+[data-theme="sunset"]{
+  --bg:#160f0d; --sidebar:#1a1210; --surface:#221715; --surface2:#2b1c19; --surface3:#38241f;
+  --border:#3a251f; --border2:#4d332b; --text:#f6ece6; --text2:#b8998c; --text3:#7a5f54;
+  --accent:#e2703a; --accent-ink:#1a0900; --accent-glow:rgba(226,112,58,.18);
+  --good:#4fbf8b; --good-dim:#12331f; --warn:#e0a53c; --warn-dim:#332405; --bad:#e15656; --bad-dim:#3a1414;
+}
+[data-theme="forest"]{
+  --bg:#0b1310; --sidebar:#0e1613; --surface:#131f1a; --surface2:#182922; --surface3:#20352c;
+  --border:#1f3129; --border2:#2c4137; --text:#e7f3ec; --text2:#8fac9d; --text3:#576f63;
+  --accent:#5fd68a; --accent-ink:#04180d; --accent-glow:rgba(95,214,138,.16);
+  --good:#5fd68a; --good-dim:#123321; --warn:#e0b23c; --warn-dim:#332605; --bad:#e2685f; --bad-dim:#391714;
+}
+[data-theme="ocean"]{
+  --bg:#081217; --sidebar:#0a161c; --surface:#0f1e25; --surface2:#142832; --surface3:#1b3440;
+  --border:#1c333d; --border2:#284452; --text:#e6f4f7; --text2:#8babb5; --text3:#546b73;
+  --accent:#2dd4d1; --accent-ink:#001616; --accent-glow:rgba(45,212,209,.16);
+  --good:#3fd48a; --good-dim:#0e3327; --warn:#e0b23c; --warn-dim:#332605; --bad:#e2645f; --bad-dim:#391613;
+}
+[data-theme="light"]{
+  --bg:#f4f5f8; --sidebar:#ffffff; --surface:#ffffff; --surface2:#f1f3f7; --surface3:#e7eaf0;
+  --border:#e1e4ea; --border2:#d0d5df; --text:#171a22; --text2:#5b6376; --text3:#8890a0;
+  --accent:#2f66e6; --accent-ink:#ffffff; --accent-glow:rgba(47,102,230,.10);
+  --good:#1a9d63; --good-dim:#e3f8ee; --warn:#b3760a; --warn-dim:#fdf1de; --bad:#d13f3f; --bad-dim:#fbe9e9;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;-webkit-font-smoothing:antialiased}
+button{font-family:inherit} input,select,textarea{font-family:inherit} a{color:inherit}
+
+.shell{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 16px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:11px;padding:2px 8px 22px}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:15px;flex-shrink:0}
+.brand .txt .name{font-family:var(--font-display);font-weight:700;font-size:14.5px}
+.brand .txt .sub{font-size:10.5px;color:var(--text3);font-family:var(--font-mono);margin-top:1px}
+.nav{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r);color:var(--text2);cursor:pointer;font-weight:500;font-size:13.5px;user-select:none;transition:background .12s,color .12s}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;opacity:.85}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-glow);color:var(--accent)}
+.nav-item.active svg{opacity:1}
+.nav-tag{margin-left:auto;font-family:var(--font-mono);font-size:9.5px;padding:2px 6px;border-radius:99px;background:var(--surface3);color:var(--text3)}
+.nav-item.active .nav-tag{background:transparent;color:var(--accent)}
+.sidebar-foot{margin-top:auto;padding:12px 10px 2px;font-size:10.5px;color:var(--text3);line-height:1.6}
+.dot-line{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.pulse-dot{width:6px;height:6px;border-radius:99px;background:var(--text3)}
+.pulse-dot.live{background:var(--good);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+.main{min-width:0;padding:26px 34px 60px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.topbar h1{font-family:var(--font-display);font-size:21px;font-weight:700;letter-spacing:-.01em}
+.topbar p{color:var(--text2);font-size:12.5px;margin-top:3px}
+.view{display:none} .view.active{display:block;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:20px 22px;margin-bottom:18px}
+.card h2{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h2 .h2-note{font-family:var(--font-body);font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3)}
+label{display:block;font-size:12.5px;color:var(--text2);margin-bottom:6px;font-weight:500}
+.hint{font-size:11.5px;color:var(--text3);margin-top:7px;line-height:1.55}
+.hint code{font-family:var(--font-mono);background:var(--surface3);padding:1px 5px;border-radius:5px}
+input[type=text],input[type=number]{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:11px 13px;color:var(--text);font-family:var(--font-mono);font-size:13px}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+input[type=file]{width:100%;background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--r);padding:11px 13px;color:var(--text2);font-size:12.5px}
+select{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:9px 11px;color:var(--text);font-size:12.5px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center} .row.mt{margin-top:16px} .field{margin-bottom:16px}
+button{font-weight:600;font-size:13px;border:none;border-radius:var(--r);padding:11px 20px;cursor:pointer;transition:filter .12s,opacity .12s,transform .05s}
+button:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:var(--accent-ink)} .btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border2)} .btn-ghost:hover{color:var(--text);border-color:var(--accent)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.btn-sm{padding:7px 13px;font-size:12px;border-radius:8px}
+.checkbox-row{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text2)}
+.checkbox-row input{width:16px;height:16px;accent-color:var(--accent)}
+
+.status-pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:12px;padding:6px 13px;border-radius:99px;background:var(--surface2);border:1px solid var(--border2)}
+.status-dot{width:7px;height:7px;border-radius:99px;background:var(--text3)}
+.status-dot.running{background:var(--accent);animation:pulse 1.2s infinite}
+.status-dot.done{background:var(--good)} .status-dot.error{background:var(--bad)}
+.status-dot.otp_wait{background:var(--warn);animation:pulse 1s infinite} .status-dot.stopped{background:var(--bad)} .status-dot.pending{background:var(--text3)}
+
+.chip{font-family:var(--font-mono);font-size:10.5px;padding:3px 9px;border-radius:99px;background:var(--surface3);color:var(--text3);white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.chip.pending{background:var(--surface3);color:var(--text3)} .chip.running{background:var(--accent-glow);color:var(--accent)}
+.chip.done,.chip.success{background:var(--good-dim);color:var(--good)} .chip.error,.chip.failed{background:var(--bad-dim);color:var(--bad)}
+.chip.otp_wait{background:var(--warn-dim);color:var(--warn)} .chip.stopped{background:var(--bad-dim);color:var(--bad)} .chip.queued{background:var(--surface3);color:var(--text3)}
+
+.statgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
+@media (max-width:980px){.statgrid{grid-template-columns:repeat(3,1fr)}}
+.stat{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+.stat b{display:block;font-family:var(--font-display);font-size:20px;font-weight:700}
+.stat small{font-size:10.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+.stat.accent b{color:var(--accent)} .stat.good b{color:var(--good)} .stat.warn b{color:var(--warn)} .stat.bad b{color:var(--bad)}
+
+.activerow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.active-empty{color:var(--text3);font-size:12.5px}
+
+.lane{border:1px solid var(--border);border-radius:var(--r2);background:var(--surface2);margin-bottom:12px;padding:14px 16px}
+.lane-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lane-title{font-weight:600;font-size:13.5px}
+.lane-sub{font-family:var(--font-mono);font-size:10.5px;color:var(--text3)}
+.otp-box{background:var(--warn-dim);border:1px solid var(--warn);border-radius:var(--r);padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.otp-box span{font-size:12.5px;color:var(--text);flex:1;min-width:180px}
+.otp-box input{width:130px;letter-spacing:.25em;text-align:center}
+.acc{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);margin-top:10px;background:var(--surface)}
+.acc-name{font-weight:600;font-size:12.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.acc-meta{text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text2)}
+.bar{grid-column:1/-1;height:5px;background:var(--surface3);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+
+.log{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);font-family:var(--font-mono);font-size:11.5px;padding:12px;max-height:320px;overflow-y:auto;line-height:1.65}
+.log .t{color:var(--text3)} .log .info{color:var(--text2)} .log .ok{color:var(--good)} .log .warn{color:var(--warn)} .log .error{color:var(--bad)}
+.log-empty{color:var(--text3);font-size:12px;padding:6px 2px}
+
+.summary{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.sum-card{flex:1;min-width:105px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:13px;text-align:center}
+.sum-card span{display:block;font-family:var(--font-display);font-size:22px;font-weight:700;margin-bottom:2px}
+.sum-card small{font-size:11px;color:var(--text3)}
+.sum-card.good span{color:var(--good)} .sum-card.warn span{color:var(--warn)} .sum-card.bad span{color:var(--bad)}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--border)}
+th{color:var(--text3);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td.mono{font-family:var(--font-mono);font-size:11px;color:var(--text2);word-break:break-all}
+.table-wrap{overflow-x:auto;max-height:460px;overflow-y:auto}
+.status-cell{font-weight:600} .status-cell.good{color:var(--good)} .status-cell.warn{color:var(--warn)} .status-cell.bad{color:var(--bad)}
+
+.banner{padding:12px 14px;border-radius:var(--r);font-size:13px;margin-bottom:16px;display:none}
+.banner.show{display:block}
+.banner.working{background:var(--accent-glow);color:var(--accent);border:1px solid var(--border2)}
+.banner.error{background:var(--bad-dim);color:var(--bad);border:1px solid var(--bad)}
+.banner.success{background:var(--good-dim);color:var(--good);border:1px solid var(--good)}
+
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.theme-swatch{border:2px solid var(--border);border-radius:var(--r2);padding:14px;cursor:pointer;background:var(--surface2);transition:border-color .12s}
+.theme-swatch:hover{border-color:var(--border2)} .theme-swatch.selected{border-color:var(--accent)}
+.swatch-preview{display:flex;gap:5px;margin-bottom:10px}
+.swatch-dot{width:18px;height:18px;border-radius:99px;border:1px solid rgba(0,0,0,.15)}
+.swatch-name{font-weight:600;font-size:12.5px} .swatch-desc{font-size:11px;color:var(--text3);margin-top:2px}
+
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:760px){.settings-grid{grid-template-columns:1fr}}
+.slider-row{display:flex;align-items:center;gap:12px}
+input[type=range]{flex:1;accent-color:var(--accent)}
+.slider-val{font-family:var(--font-mono);font-size:12.5px;background:var(--surface2);padding:4px 10px;border-radius:7px;min-width:26px;text-align:center}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-row .lbl{font-size:13px;color:var(--text);font-weight:500}
+.toggle-row .desc{font-size:11.5px;color:var(--text3);margin-top:2px}
+.switch{position:relative;width:42px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch .track{position:absolute;inset:0;background:var(--surface3);border-radius:99px;cursor:pointer;transition:background .15s;border:1px solid var(--border2)}
+.switch .track::after{content:'';position:absolute;width:18px;height:18px;border-radius:99px;background:var(--text2);top:2px;left:2px;transition:transform .15s,background .15s}
+.switch input:checked+.track{background:var(--accent-glow);border-color:var(--accent)}
+.switch input:checked+.track::after{transform:translateX(18px);background:var(--accent)}
+
+.divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.collapsible summary{cursor:pointer;font-size:12.5px;color:var(--text2);font-weight:600;padding:4px 0}
+.collapsible[open] summary{color:var(--text)}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--good);color:var(--good);padding:12px 18px;border-radius:var(--r);font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;z-index:50}
+.toast.show{opacity:1;transform:none}
+::-webkit-scrollbar{width:9px;height:9px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="mark">S</div>
+      <div class="txt"><div class="name">DMS Media Suite</div><div class="sub">Spyne · :7433</div></div>
+    </div>
+    <div class="nav">
+      <div class="nav-item active" data-view="run">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        DMS Live Catalogue <span class="nav-tag" id="navRunTag"></span>
+      </div>
+      <div class="nav-item" data-view="organizer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M12 12v5M9.5 14.5h5"/></svg>
+        VIN Organizer
+      </div>
+      <div class="nav-item" data-view="csvgen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        CSV Generator
+      </div>
+      <div class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </div>
+    </div>
+    <div class="sidebar-foot">
+      <div class="dot-line"><span class="pulse-dot" id="sideDot"></span><span id="sideStatus">idle</span></div>
+      <div>Everything runs on this machine.<br/>Credentials stay in .env.local.</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="view active" id="view-run">
+      <div class="topbar">
+        <div>
+          <h1>DMS Live Catalogue</h1>
+          <p>DealerCenter, VinMotion &amp; vAuto — one Chrome window per DMS, real tabs for VIN concurrency.</p>
+        </div>
+        <span class="status-pill"><span class="status-dot" id="runDot"></span><span id="runStatusText">idle</span></span>
+      </div>
+
+      <div class="card">
+        <h2>Data folder</h2>
+        <div class="field">
+          <label>Path to the folder that contains your account subfolders (the "Live" folder)</label>
+          <input type="text" id="folderPath" placeholder="C:\Users\You\Desktop\Live" spellcheck="false"/>
+        </div>
+        <div class="row">
+          <button class="btn-primary" id="startBtn">Start upload</button>
+          <button class="btn-ghost" id="stopBtn">Stop</button>
+          <button class="btn-ghost" id="resetBtn">Reset</button>
+        </div>
+        <div class="hint">Accounts and Gmail are read from <code>.env.local</code> — <code>DC_ACCOUNT_n_*</code> (DealerCenter),
+          <code>VM_ACCOUNT_n_*</code> (VinMotion), or <code>VA_ACCOUNT_n_*</code> (vAuto).
+          Concurrency (Chrome windows, tabs per window) is set on the Settings page.</div>
+      </div>
+
+      <div class="statgrid">
+        <div class="stat accent"><b id="statChrome">0/0</b><small>Chrome windows</small></div>
+        <div class="stat accent"><b id="statTabs">0/0</b><small>VIN tabs</small></div>
+        <div class="stat"><b id="statQueued">0</b><small>Queued</small></div>
+        <div class="stat accent"><b id="statRunning">0</b><small>Running</small></div>
+        <div class="stat good"><b id="statCompleted">0</b><small>Completed</small></div>
+        <div class="stat bad"><b id="statFailed">0</b><small>Failed</small></div>
+      </div>
+
+      <div class="card">
+        <h2>Active Now</h2>
+        <div class="activerow" id="activeDms"></div>
+        <div class="activerow" id="activeAccounts"></div>
+      </div>
+
+      <div id="lanesCard" class="card" style="display:none">
+        <h2>Chrome Windows</h2>
+        <div id="lanes"></div>
+      </div>
+
+      <div class="card">
+        <h2>Combined Activity 1 <span class="h2-note">— the original activity feed, unchanged</span></h2>
+        <div class="row" style="margin-bottom:10px">
+          <select id="downloadScope">
+            <option value="combined">Combined Activity</option>
+          </select>
+          <button type="button" class="btn-ghost btn-sm" id="downloadLogBtn">Download .txt</button>
+        </div>
+        <div class="log" id="combinedLog"><div class="log-empty">No activity yet — start an upload to see live output here.</div></div>
+      </div>
+
+      <div class="card">
+        <h2>Combined Activity 2 <span class="h2-note">— structured, per-VIN live status</span></h2>
+        <div class="summary" id="ca2Summary"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>DMS</th><th>Account</th><th>Chrome</th><th>Tab</th><th>VIN</th><th>Enterprise</th>
+              <th>Rooftop</th><th>Current Action</th><th>Status</th><th>Start</th><th>Duration</th><th>Retry</th><th>Error</th>
+            </tr></thead>
+            <tbody id="ca2Body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-organizer">
+      <div class="topbar">
+        <div>
+          <h1>VIN Organizer</h1>
+          <p>Sorts failed VINs into <code>Master\Enterprise\VIN</code> — live off Combined Activity, or from an uploaded log.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Live &amp; Manual Process</h2>
+        <div class="field">
+          <label>Path (defaults to the current/last run's data folder)</label>
+          <input type="text" id="liveOrgPath" placeholder="D:\Live Catalogue tool\New folder"/>
+          <p class="hint">Leave blank to use the path from the current DMS Live Catalogue run automatically.
+            Failed VINs are also moved <b>automatically</b> the moment they hit their final attempt — this button is for
+            re-running on demand, or for VINs from earlier in the run.</p>
+        </div>
+        <div class="field checkbox-row">
+          <input type="checkbox" id="liveOrgPreview"/>
+          <label for="liveOrgPreview" style="margin:0">Preview only — show what would move, don't move anything yet</label>
+        </div>
+        <div class="row">
+          <button type="button" class="btn-primary" id="liveOrgBtn">Process Now (Live)</button>
+        </div>
+        <div class="banner" id="liveOrgBanner"></div>
+      </div>
+
+      <details class="card collapsible">
+        <summary>Or analyze an uploaded log file instead</summary>
+        <form id="organizerForm" style="margin-top:14px">
+          <div class="field">
+            <label>Activity Log</label>
+            <input type="file" id="orgLogFile" accept=".txt,.log"/>
+          </div>
+          <div class="field">
+            <label>Path</label>
+            <input type="text" id="orgPath" placeholder="D:\Live Catalogue tool\New folder"/>
+          </div>
+          <div class="field checkbox-row">
+            <input type="checkbox" id="orgPreview"/>
+            <label for="orgPreview" style="margin:0">Preview only</label>
+          </div>
+          <button type="submit" class="btn-primary">Process Uploaded Log</button>
+          <div class="banner" id="orgBanner"></div>
+        </form>
+      </details>
+
+      <div class="card" id="orgResultsCard" style="display:none">
+        <div class="summary" id="orgSummary"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>VIN</th><th>Enterprise</th><th>Source Path</th><th>Destination Path</th><th>Status</th></tr></thead>
+            <tbody id="orgResultsBody"></tbody>
+          </table>
+        </div>
+        <div class="row mt">
+          <button type="button" class="btn-ghost" id="orgCopyBtn">Copy Results</button>
+          <button type="button" class="btn-ghost" id="orgCsvBtn">Download CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-csvgen">
+      <div class="topbar">
+        <div><h1>CSV Generator</h1><p>Counts images in every leaf folder under a path and writes a CSV report there.</p></div>
+      </div>
+      <div class="card">
+        <form id="csvgenForm">
+          <div class="field">
+            <label>Path to scan</label>
+            <input type="text" id="csvPath" placeholder="D:\Live Catalogue tool\New folder"/>
+            <p class="hint">The CSV is written into this same folder, as <code>&lt;folder name&gt;_image_counts.csv</code>.</p>
+          </div>
+          <div class="field checkbox-row">
+            <input type="checkbox" id="csvRecursive"/>
+            <label for="csvRecursive" style="margin:0">Count images recursively</label>
+          </div>
+          <div class="field">
+            <label>Image extensions (comma-separated)</label>
+            <input type="text" id="csvExts" placeholder=".jpg, .jpeg, .png, .bmp, .tiff, .tif, .webp, .heic, .heif"/>
+          </div>
+          <button type="submit" class="btn-primary">Generate CSV</button>
+          <div class="banner" id="csvBanner"></div>
+        </form>
+      </div>
+      <div class="card" id="csvResultsCard" style="display:none">
+        <div class="summary" id="csvSummary"></div>
+        <div class="hint" id="csvPathNote" style="margin-bottom:14px"></div>
+        <div class="table-wrap"><table><thead id="csvTableHead"></thead><tbody id="csvResultsBody"></tbody></table></div>
+        <div class="row mt"><button type="button" class="btn-ghost" id="csvDownloadBtn">Download CSV</button></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-settings">
+      <div class="topbar"><div><h1>Settings</h1><p>Theme, concurrency, and defaults — applied across all three tools.</p></div></div>
+
+      <div class="card">
+        <h2>Theme</h2>
+        <div class="theme-grid" id="themeGrid"></div>
+      </div>
+
+      <div class="card">
+        <h2>DMS Live Catalogue Settings</h2>
+        <div class="settings-grid">
+          <div>
+            <label>Maximum DMS / Chrome windows <span class="hint" style="display:inline">(1–5, default 3)</span></label>
+            <div class="slider-row"><input type="range" min="1" max="5" step="1" id="rngWindows"/><span class="slider-val" id="valWindows">3</span></div>
+            <p class="hint">One Chrome window per DMS. Extra logins for the same DMS queue and run one at a time in that window.</p>
+          </div>
+          <div>
+            <label>Maximum duplicate VIN tabs per Chrome <span class="hint" style="display:inline">(1–5, default 3)</span></label>
+            <div class="slider-row"><input type="range" min="1" max="5" step="1" id="rngTabs"/><span class="slider-val" id="valTabs">3</span></div>
+            <p class="hint">Real browser tabs sharing one login — not separate Chrome processes.</p>
+          </div>
+        </div>
+        <div class="field" style="margin-top:16px">
+          <label>Maximum total VIN concurrency <span class="hint" style="display:inline">(default 9 = 3 windows × 3 tabs)</span></label>
+          <input type="number" id="numTotalConcurrency" min="1" max="25" style="max-width:160px"/>
+        </div>
+
+        <div class="toggle-row">
+          <div><div class="lbl">One account per DMS window</div><div class="desc">ON: each DMS gets exactly one Chrome window, processing its accounts one at a time. OFF: accounts pool freely across all Chrome window slots.</div></div>
+          <label class="switch"><input type="checkbox" id="toggleOneAccount"/><span class="track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="lbl">Headless mode</div><div class="desc">Hide the automated browser windows entirely.</div></div>
+          <label class="switch"><input type="checkbox" id="toggleHeadless"/><span class="track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="lbl">Auto-queue when slots are full</div><div class="desc">ON: extra DMS logins wait for a free Chrome window. OFF: they're skipped instead.</div></div>
+          <label class="switch"><input type="checkbox" id="toggleAutoQueue"/><span class="track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="lbl">Browser reuse</div><div class="desc">Keep one Chrome window open across accounts in the same DMS instead of relaunching each time.</div></div>
+          <label class="switch"><input type="checkbox" id="toggleBrowserReuse"/><span class="track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="lbl">Auto-retry failed VINs</div><div class="desc">Retry a VIN automatically before marking it failed.</div></div>
+          <label class="switch"><input type="checkbox" id="toggleAutoRetry"/><span class="track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="lbl">Auto-move failed VINs to Master</div><div class="desc">The moment a VIN exhausts its retries in Combined Activity, move its folder into Master/Enterprise/VIN automatically.</div></div>
+          <label class="switch"><input type="checkbox" id="toggleAutoMove"/><span class="track"></span></label>
+        </div>
+
+        <div class="settings-grid" style="margin-top:16px">
+          <div class="field">
+            <label>Retry count <span class="hint" style="display:inline">(retries after the 1st attempt)</span></label>
+            <input type="number" id="numRetryCount" min="0" max="10"/>
+          </div>
+          <div class="field">
+            <label>Save/upload retry attempts (UI clicks)</label>
+            <input type="number" id="numRetries" min="1" max="20"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>OTP wait timeout (seconds)</label>
+          <input type="number" id="numOtpTimeout" min="30" max="600" style="max-width:160px"/>
+        </div>
+        <div class="field">
+          <label>Image extensions to upload (comma-separated)</label>
+          <input type="text" id="txtImgExts" placeholder=".jpg, .jpeg, .png"/>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>General</h2>
+        <div class="toggle-row">
+          <div><div class="lbl">Open control panel automatically</div><div class="desc">Launch this page in your browser when the app starts.</div></div>
+          <label class="switch"><input type="checkbox" id="toggleAutoOpen"/><span class="track"></span></label>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="saveSettingsBtn">Save Settings</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast">Settings saved</div>
+
+<script>
+const navItems = document.querySelectorAll('.nav-item');
+navItems.forEach(item => item.addEventListener('click', () => {
+  navItems.forEach(n => n.classList.remove('active'));
+  item.classList.add('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + item.dataset.view).classList.add('active');
+}));
+
+function escapeHtml(str){ const d=document.createElement('div'); d.textContent = str==null?'':String(str); return d.innerHTML; }
+function setBanner(el, msg, kind){ el.textContent = msg; el.className = 'banner show ' + kind; }
+function showToast(msg, isError){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = isError ? 'var(--bad)' : 'var(--good)';
+  t.style.color = isError ? 'var(--bad)' : 'var(--good)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+const THEMES = [
+  { id:'midnight', name:'Midnight', desc:'Navy · signal blue', dots:['#0a0d14','#131826','#4f8ef7'] },
+  { id:'slate',    name:'Slate',    desc:'Graphite · amber',   dots:['#0e1013','#171a1f','#e0a53c'] },
+  { id:'sunset',   name:'Sunset',   desc:'Warm dark · clay',   dots:['#160f0d','#221715','#e2703a'] },
+  { id:'forest',   name:'Forest',   desc:'Deep green · lime',  dots:['#0b1310','#131f1a','#5fd68a'] },
+  { id:'ocean',    name:'Ocean',    desc:'Teal · cyan',        dots:['#081217','#0f1e25','#2dd4d1'] },
+  { id:'light',    name:'Light',    desc:'Daylight console',   dots:['#f4f5f8','#ffffff','#2f66e6'] },
+];
+const themeGrid = document.getElementById('themeGrid');
+THEMES.forEach(t => {
+  const el = document.createElement('div');
+  el.className = 'theme-swatch'; el.dataset.theme = t.id;
+  el.innerHTML = `<div class="swatch-preview">${t.dots.map(c=>`<span class="swatch-dot" style="background:${c}"></span>`).join('')}</div>
+    <div class="swatch-name">${t.name}</div><div class="swatch-desc">${t.desc}</div>`;
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    document.documentElement.setAttribute('data-theme', t.id);
+    currentSettings.theme = t.id;
+  });
+  themeGrid.appendChild(el);
+});
+function applyThemeToGrid(themeId){
+  document.documentElement.setAttribute('data-theme', themeId);
+  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.toggle('selected', s.dataset.theme === themeId));
+}
+
+let currentSettings = {};
+async function loadSettings(){
+  try{ currentSettings = await (await fetch('/api/settings')).json(); }catch(e){ currentSettings = {}; }
+  applyThemeToGrid(currentSettings.theme || 'midnight');
+  document.getElementById('rngWindows').value = currentSettings.max_dms_windows || 3;
+  document.getElementById('valWindows').textContent = currentSettings.max_dms_windows || 3;
+  document.getElementById('rngTabs').value = currentSettings.max_tabs_per_dms || 3;
+  document.getElementById('valTabs').textContent = currentSettings.max_tabs_per_dms || 3;
+  document.getElementById('numTotalConcurrency').value = currentSettings.max_total_vin_concurrency || 9;
+  document.getElementById('toggleOneAccount').checked = currentSettings.one_account_per_dms_window !== false;
+  document.getElementById('toggleHeadless').checked = !!currentSettings.headless;
+  document.getElementById('toggleAutoQueue').checked = currentSettings.auto_queue_when_full !== false;
+  document.getElementById('toggleBrowserReuse').checked = currentSettings.browser_reuse !== false;
+  document.getElementById('toggleAutoRetry').checked = currentSettings.auto_retry_failed_vins !== false;
+  document.getElementById('toggleAutoMove').checked = currentSettings.auto_move_failed_vins !== false;
+  document.getElementById('numRetryCount').value = currentSettings.retry_count ?? 2;
+  document.getElementById('numRetries').value = currentSettings.save_retry_attempts || 6;
+  document.getElementById('numOtpTimeout').value = currentSettings.otp_timeout_seconds || 120;
+  document.getElementById('txtImgExts').value = (currentSettings.image_extensions || ['.jpg','.jpeg','.png']).join(', ');
+  document.getElementById('toggleAutoOpen').checked = currentSettings.auto_open_browser !== false;
+}
+document.getElementById('rngWindows').addEventListener('input', e => document.getElementById('valWindows').textContent = e.target.value);
+document.getElementById('rngTabs').addEventListener('input', e => document.getElementById('valTabs').textContent = e.target.value);
+
+document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+  const patch = {
+    theme: currentSettings.theme || 'midnight',
+    max_dms_windows: parseInt(document.getElementById('rngWindows').value, 10),
+    max_tabs_per_dms: parseInt(document.getElementById('rngTabs').value, 10),
+    max_total_vin_concurrency: parseInt(document.getElementById('numTotalConcurrency').value, 10) || 9,
+    one_account_per_dms_window: document.getElementById('toggleOneAccount').checked,
+    headless: document.getElementById('toggleHeadless').checked,
+    auto_queue_when_full: document.getElementById('toggleAutoQueue').checked,
+    browser_reuse: document.getElementById('toggleBrowserReuse').checked,
+    auto_retry_failed_vins: document.getElementById('toggleAutoRetry').checked,
+    auto_move_failed_vins: document.getElementById('toggleAutoMove').checked,
+    retry_count: parseInt(document.getElementById('numRetryCount').value, 10) || 0,
+    save_retry_attempts: parseInt(document.getElementById('numRetries').value, 10) || 6,
+    otp_timeout_seconds: parseInt(document.getElementById('numOtpTimeout').value, 10) || 120,
+    image_extensions: document.getElementById('txtImgExts').value.split(',').map(s=>s.trim()).filter(Boolean),
+    auto_open_browser: document.getElementById('toggleAutoOpen').checked,
+  };
+  try{
+    const r = await fetch('/api/settings', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(patch)});
+    currentSettings = await r.json();
+    showToast('Settings saved');
+  }catch(e){ showToast('Could not save settings', true); }
+});
+
+document.getElementById('startBtn').addEventListener('click', async () => {
+  const folder = document.getElementById('folderPath').value.trim();
+  if(!folder){ alert('Enter your data folder path first.'); return; }
+  const r = await fetch('/api/start', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({folder})});
+  const j = await r.json();
+  if(!j.ok) alert(j.error || 'Could not start');
+});
+document.getElementById('stopBtn').addEventListener('click', () => fetch('/api/stop', {method:'POST'}));
+document.getElementById('resetBtn').addEventListener('click', async () => {
+  const r = await fetch('/api/reset', {method:'POST'});
+  const j = await r.json();
+  if(!j.ok){ alert(j.error || 'Could not reset'); return; }
+  lastState = null;
+  document.getElementById('lanes').innerHTML = '';
+  document.getElementById('lanesCard').style.display = 'none';
+  document.getElementById('combinedLog').innerHTML = '<div class="log-empty">No activity yet — start an upload to see live output here.</div>';
+  document.getElementById('ca2Body').innerHTML = '';
+  document.getElementById('activeDms').innerHTML = '';
+  document.getElementById('activeAccounts').innerHTML = '';
+  refreshDownloadScopeOptions([]);
+});
+
+let lastState = null;
+
+function renderLanes(lanes){
+  const card = document.getElementById('lanesCard');
+  if(!lanes.length){ card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  document.getElementById('lanes').innerHTML = lanes.map(lane => {
+    const dmsLabel = lane.dms ? (lane.dms==='dealercenter'?'DealerCenter':lane.dms==='vinmotion'?'VinMotion':lane.dms==='vauto'?'vAuto':lane.dms) : '—';
+    const otp = lane.status === 'otp_wait' ? `
+      <div class="otp-box">
+        <span>${escapeHtml(lane.otp_prompt || 'Enter the verification code')}</span>
+        <input type="text" maxlength="8" placeholder="000000" id="otpInput_${lane.id}"/>
+        <button class="btn-primary btn-sm" onclick="submitOtp('${lane.id}')">Submit</button>
+      </div>` : '';
+    const accountsHtml = (lane.accounts || []).map(a => {
+      const total=a.total||0, done=a.done||0, failed=a.failed||0;
+      const pct = total ? Math.round(((done+failed)/total)*100) : 0;
+      return `<div class="acc">
+        <div class="acc-name">${escapeHtml(a.name)} <span class="chip ${a.status}">${a.status}</span></div>
+        <div class="acc-meta">${done}/${total} done${failed?` · ${failed} failed`:''}</div>
+        <div class="bar"><i style="width:${pct}%"></i></div>
+      </div>`;
+    }).join('');
+    return `<div class="lane">
+      <div class="lane-head">
+        <span class="lane-title">${escapeHtml(lane.label)}</span>
+        <span class="lane-sub">${dmsLabel}${lane.current_account ? ' · ' + escapeHtml(lane.current_account) : ''}${lane.current_rooftop ? ' · ' + escapeHtml(lane.current_rooftop) : ''}</span>
+        <span class="chip ${lane.status}" style="margin-left:auto">${lane.status}</span>
+      </div>
+      ${otp}
+      ${accountsHtml}
+    </div>`;
+  }).join('');
+}
+
+window.submitOtp = async function(laneId){
+  const input = document.getElementById('otpInput_' + laneId);
+  const code = input.value.trim();
+  if(!code) return;
+  await fetch('/api/otp', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({lane_id: laneId, code})});
+  input.value = '';
+};
+
+function refreshDownloadScopeOptions(lanes){
+  const sel = document.getElementById('downloadScope');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="combined">Combined Activity</option>' +
+    lanes.map(l => `<option value="${l.id}">${escapeHtml(l.label)}</option>`).join('');
+  if([...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+
+document.getElementById('downloadLogBtn').addEventListener('click', () => {
+  if(!lastState) return;
+  const scope = document.getElementById('downloadScope').value;
+  let text, filename;
+  if(scope === 'combined'){
+    text = (lastState.log || []).map(e => `${e.t} ${e.job ? '['+e.job+'] ' : ''}${e.msg}`).join('\n');
+    filename = 'combined_activity.txt';
+  } else {
+    const lane = (lastState.lanes || []).find(l => l.id === scope);
+    text = lane ? (lane.log || []).map(e => `${e.t} ${e.msg}`).join('\n') : '';
+    filename = (lane ? lane.label.replace(/[^\w.-]+/g,'_') : scope) + '_activity.txt';
+  }
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+});
+
+function renderCombinedActivity2(vinOps, counters){
+  document.getElementById('ca2Summary').innerHTML = `
+    <div class="sum-card accent"><span>${counters.chrome_open}/${counters.chrome_max}</span><small>Chrome usage</small></div>
+    <div class="sum-card accent"><span>${counters.running}/${counters.tabs_max}</span><small>VIN tabs</small></div>
+    <div class="sum-card"><span>${counters.queued}</span><small>Queued</small></div>
+    <div class="sum-card accent"><span>${counters.running}</span><small>Running</small></div>
+    <div class="sum-card good"><span>${counters.completed}</span><small>Completed</small></div>
+    <div class="sum-card bad"><span>${counters.failed}</span><small>Failed</small></div>`;
+
+  const rows = vinOps.slice().reverse();
+  document.getElementById('ca2Body').innerHTML = rows.map(op => {
+    const start = op.start_ts ? new Date(op.start_ts*1000).toLocaleTimeString() : '—';
+    const dur = op.duration != null ? op.duration.toFixed(1)+'s' : '—';
+    return `<tr>
+      <td>${escapeHtml(op.dms_label||op.dms||'')}</td>
+      <td>${escapeHtml(op.account||'')}</td>
+      <td>${escapeHtml(op.chrome||'')}</td>
+      <td>${op.tab ?? '—'}</td>
+      <td class="mono">${escapeHtml(op.vin||'')}</td>
+      <td>${escapeHtml(op.enterprise||'')}</td>
+      <td>${escapeHtml(op.rooftop||'')}</td>
+      <td>${escapeHtml(op.current_action||'')}</td>
+      <td><span class="chip ${op.status}">${op.status}</span></td>
+      <td class="mono">${start}</td>
+      <td class="mono">${dur}</td>
+      <td>${op.retry}/${op.total_attempts-1}</td>
+      <td class="mono">${escapeHtml(op.error||'')}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderActiveRows(lanes){
+  const dmsEl = document.getElementById('activeDms');
+  const accEl = document.getElementById('activeAccounts');
+  const activeLanes = lanes.filter(l => l.status === 'running' || l.status === 'otp_wait');
+  dmsEl.innerHTML = activeLanes.length
+    ? activeLanes.map(l => `<span class="chip running">${escapeHtml(l.dms ? (l.dms==='dealercenter'?'DealerCenter':l.dms==='vinmotion'?'VinMotion':'vAuto') : l.label)}</span>`).join('')
+    : '<span class="active-empty">No DMS windows active</span>';
+  accEl.innerHTML = activeLanes.filter(l => l.current_account).length
+    ? activeLanes.filter(l => l.current_account).map(l => `<span class="chip pending">${escapeHtml(l.current_account)}</span>`).join('')
+    : '<span class="active-empty">No account currently active</span>';
+}
+
+function renderRunState(s){
+  lastState = s;
+  const anyOtp = (s.lanes || []).some(l => l.status === 'otp_wait');
+  const dotStatus = anyOtp ? 'otp_wait' : s.run_status;
+  document.getElementById('runDot').className = 'status-dot ' + dotStatus;
+  document.getElementById('runStatusText').textContent = anyOtp ? 'waiting for OTP' : s.run_status;
+  document.getElementById('sideDot').className = 'pulse-dot' + (s.run_status === 'running' ? ' live' : '');
+  document.getElementById('sideStatus').textContent = s.run_status;
+  document.getElementById('startBtn').disabled = (s.run_status === 'running');
+  document.getElementById('navRunTag').textContent = s.run_status === 'running' ? '●' : '';
+
+  const c = s.counters || {};
+  document.getElementById('statChrome').textContent = `${c.chrome_open||0}/${c.chrome_max||0}`;
+  document.getElementById('statTabs').textContent = `${c.running||0}/${c.tabs_max||0}`;
+  document.getElementById('statQueued').textContent = c.queued||0;
+  document.getElementById('statRunning').textContent = c.running||0;
+  document.getElementById('statCompleted').textContent = c.completed||0;
+  document.getElementById('statFailed').textContent = c.failed||0;
+
+  renderActiveRows(s.lanes || []);
+  renderLanes(s.lanes || []);
+  refreshDownloadScopeOptions(s.lanes || []);
+  renderCombinedActivity2(s.vin_ops || [], c);
+
+  const log = document.getElementById('combinedLog');
+  const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+  log.innerHTML = (s.log || []).length
+    ? s.log.map(e => `<div><span class="t">${e.t}</span> ${e.job?`<span class="chip pending" style="margin-right:4px">${escapeHtml(e.job)}</span>`:''}<span class="${e.kind}">${escapeHtml(e.msg)}</span></div>`).join('')
+    : '<div class="log-empty">No activity yet — start an upload to see live output here.</div>';
+  if(atBottom) log.scrollTop = log.scrollHeight;
+
+  if(!document.getElementById('liveOrgPath').value && s.root_path){
+    document.getElementById('liveOrgPath').placeholder = s.root_path;
+  }
+}
+
+async function pollState(){
+  try{ renderRunState(await (await fetch('/api/state')).json()); }catch(e){}
+}
+setInterval(pollState, 1200);
+
+let orgLastResults = [];
+
+document.getElementById('liveOrgBtn').addEventListener('click', async () => {
+  const banner = document.getElementById('liveOrgBanner');
+  const path = document.getElementById('liveOrgPath').value.trim();
+  const preview = document.getElementById('liveOrgPreview').checked;
+  setBanner(banner, 'Reading Combined Activity and sorting failed VINs…', 'working');
+  document.getElementById('orgResultsCard').style.display = 'none';
+  try{
+    const r = await fetch('/api/organize_live', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({path, preview_only: preview})});
+    const data = await r.json();
+    if(!data.ok){ setBanner(banner, 'Error: ' + data.error, 'error'); return; }
+    orgLastResults = data.results;
+    renderOrgResults(data);
+    setBanner(banner, (data.preview ? 'Preview complete — nothing was moved. ' : 'Done. ') + 'Master folder: ' + data.master_path, 'success');
+  }catch(err){ setBanner(banner, 'Request failed: ' + err.message, 'error'); }
+});
+
+document.getElementById('organizerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fileInput = document.getElementById('orgLogFile');
+  const pathInput = document.getElementById('orgPath');
+  const previewInput = document.getElementById('orgPreview');
+  const banner = document.getElementById('orgBanner');
+  if(!fileInput.files.length){ setBanner(banner, 'Choose an Activity Log file first.', 'error'); return; }
+  if(!pathInput.value.trim()){ setBanner(banner, 'Paste the path where the VIN folders live.', 'error'); return; }
+  const fd = new FormData();
+  fd.append('log_file', fileInput.files[0]);
+  fd.append('path', pathInput.value.trim());
+  fd.append('preview_only', previewInput.checked ? 'true' : 'false');
+  setBanner(banner, 'Processing…', 'working');
+  document.getElementById('orgResultsCard').style.display = 'none';
+  try{
+    const r = await fetch('/api/organize', {method:'POST', body: fd});
+    const data = await r.json();
+    if(!data.ok){ setBanner(banner, 'Error: ' + data.error, 'error'); return; }
+    orgLastResults = data.results;
+    renderOrgResults(data);
+    setBanner(banner, (data.preview ? 'Preview complete — nothing was moved. ' : 'Done. ') + 'Master folder: ' + data.master_path, 'success');
+  }catch(err){ setBanner(banner, 'Request failed: ' + err.message, 'error'); }
+});
+
+function renderOrgResults(data){
+  const s = data.summary;
+  document.getElementById('orgSummary').innerHTML = `
+    <div class="sum-card"><span>${s.total}</span><small>Total failed VINs</small></div>
+    <div class="sum-card good"><span>${s.moved}</span><small>${data.preview?'Would move':'Moved'}</small></div>
+    <div class="sum-card warn"><span>${s.skipped}</span><small>Skipped</small></div>
+    <div class="sum-card bad"><span>${s.not_found}</span><small>Not found</small></div>
+    <div class="sum-card bad"><span>${s.errors}</span><small>Errors</small></div>`;
+  document.getElementById('orgResultsBody').innerHTML = data.results.map(r => `<tr>
+    <td>${escapeHtml(r.vin)}</td><td>${escapeHtml(r.enterprise)}</td>
+    <td class="mono">${escapeHtml(r.source_path||'—')}</td><td class="mono">${escapeHtml(r.dest_path||'—')}</td>
+    <td class="status-cell ${orgStatusClass(r.status)}">${escapeHtml(r.status)}</td></tr>`).join('');
+  document.getElementById('orgResultsCard').style.display = 'block';
+}
+function orgStatusClass(status){
+  if(status.startsWith('moved')||status.startsWith('would move')) return 'good';
+  if(status.startsWith('skipped')) return 'warn';
+  return 'bad';
+}
+document.getElementById('orgCopyBtn').addEventListener('click', () => {
+  if(!orgLastResults.length) return;
+  const byEnt = {}; orgLastResults.forEach(r => (byEnt[r.enterprise]=byEnt[r.enterprise]||[]).push(r));
+  const lines = [];
+  Object.keys(byEnt).forEach(ent => { lines.push(ent); byEnt[ent].forEach(r=>lines.push('  '+r.vin+' — '+r.status)); lines.push(''); });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('Results copied to clipboard'));
+});
+document.getElementById('orgCsvBtn').addEventListener('click', () => {
+  if(!orgLastResults.length) return;
+  downloadCsv('vin_organizer_results.csv', ['VIN','Enterprise','Source Path','Destination Path','Status'],
+    orgLastResults.map(r => [r.vin, r.enterprise, r.source_path||'', r.dest_path||'', r.status]));
+});
+
+let csvLastRows = [], csvLastCols = [];
+document.getElementById('csvgenForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const path = document.getElementById('csvPath').value.trim();
+  const recursive = document.getElementById('csvRecursive').checked;
+  const extsRaw = document.getElementById('csvExts').value.trim();
+  const banner = document.getElementById('csvBanner');
+  if(!path){ setBanner(banner, 'Paste the path to scan first.', 'error'); return; }
+  const body = { path, recursive };
+  if(extsRaw) body.image_extensions = extsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+  setBanner(banner, 'Scanning folders and counting images…', 'working');
+  document.getElementById('csvResultsCard').style.display = 'none';
+  try{
+    const r = await fetch('/api/csvgen', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    const data = await r.json();
+    if(!data.ok){ setBanner(banner, 'Error: ' + data.error, 'error'); return; }
+    if(!data.rows.length){ setBanner(banner, data.message || 'No leaf folders found.', 'error'); return; }
+    csvLastRows = data.rows; csvLastCols = data.columns;
+    renderCsvResults(data);
+    setBanner(banner, `Done — ${data.total_leaf_folders} folder(s) scanned, ${data.total_images} image(s) counted.`, 'success');
+  }catch(err){ setBanner(banner, 'Request failed: ' + err.message, 'error'); }
+});
+function renderCsvResults(data){
+  document.getElementById('csvSummary').innerHTML = `
+    <div class="sum-card"><span>${data.total_leaf_folders}</span><small>Leaf folders</small></div>
+    <div class="sum-card good"><span>${data.total_images}</span><small>Images counted</small></div>`;
+  const note = document.getElementById('csvPathNote');
+  note.textContent = data.csv_path ? `CSV written to: ${data.csv_path}` : (data.csv_write_error ? `Could not write the CSV file: ${data.csv_write_error}` : '');
+  document.getElementById('csvTableHead').innerHTML = '<tr>' + data.columns.map(c=>`<th>${escapeHtml(c)}</th>`).join('') + '</tr>';
+  document.getElementById('csvResultsBody').innerHTML = data.rows.map(row =>
+    '<tr>' + data.columns.map(c=>`<td class="mono">${escapeHtml(row[c])}</td>`).join('') + '</tr>').join('');
+  document.getElementById('csvResultsCard').style.display = 'block';
+}
+document.getElementById('csvDownloadBtn').addEventListener('click', () => {
+  if(!csvLastRows.length) return;
+  downloadCsv('image_counts.csv', csvLastCols, csvLastRows.map(r => csvLastCols.map(c => r[c])));
+});
+
+function downloadCsv(filename, headers, rows){
+  const esc = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+  const csvText = [headers.map(esc).join(',')].concat(rows.map(r => r.map(esc).join(','))).join('\n');
+  const blob = new Blob([csvText], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+loadSettings();
+pollState();
+</script>
+</body>
+</html>

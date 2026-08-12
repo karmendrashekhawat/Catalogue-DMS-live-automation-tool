@@ -2,7 +2,7 @@
 set -e
 
 echo ""
-echo "  DealerCenter Media Uploader — Spyne"
+echo "  DMS Media Suite — Spyne"
 echo ""
 
 if ! command -v python3 &>/dev/null; then
@@ -15,7 +15,7 @@ fi
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "  [1/3] Installing dependencies (first run only)..."
-python3 -m pip install -q playwright python-dotenv
+python3 -m pip install -q -r "$DIR/requirements.txt"
 
 echo "  [2/3] Installing Playwright browser (first run only)..."
 python3 -m playwright install chromium || true
