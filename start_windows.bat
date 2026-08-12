@@ -1,8 +1,8 @@
 @echo off
-title DealerCenter Media Uploader — Spyne
+title DMS Media Suite — Spyne
 
 echo.
-echo   DealerCenter Media Uploader - Spyne
+echo   DMS Media Suite - Spyne
 echo.
 
 python --version >nul 2>&1
@@ -13,7 +13,7 @@ if %errorlevel% neq 0 (
 )
 
 echo  [1/3] Installing dependencies (first run only)...
-python -m pip install -q playwright python-dotenv
+python -m pip install -q -r requirements.txt
 
 echo  [2/3] Installing Playwright browser (first run only)...
 python -m playwright install chromium

@@ -1,0 +1,17 @@
+{
+  "theme": "light",
+  "auto_open_browser": true,
+  "image_extensions": [".jpg", ".jpeg", ".png"],
+  "max_dms_windows": 3,
+  "max_tabs_per_dms": 3,
+  "max_total_vin_concurrency": 9,
+  "one_account_per_dms_window": true,
+  "headless": false,
+  "auto_queue_when_full": true,
+  "browser_reuse": true,
+  "auto_retry_failed_vins": true,
+  "retry_count": 2,
+  "auto_move_failed_vins": true,
+  "save_retry_attempts": 6,
+  "otp_timeout_seconds": 120
+}
